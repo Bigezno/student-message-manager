@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+                        
+                        
+    <!-- 扩充了注解驱动-->
+	  <mvc:annotation-driven validator="validator"  conversion-service="conversionService">    
+	  	<!-- 设置Json格式输出文件 -->    
+        <mvc:message-converters>    
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">    
+                <property name="supportedMediaTypes">    
+                    <list>                          
+                        <value>text/html;charset=UTF-8</value><!-- 避免IE出现下载JSON文件的情况 -->    
+                    </list>    
+                </property>
+                <property name="objectMapper">    
+                    <bean class="com.fasterxml.jackson.databind.ObjectMapper">  
+                        <!-- 处理responseBody 里面日期类型 -->    
+                        <property name="dateFormat">    
+                            <bean class="java.text.SimpleDateFormat">    
+                                <constructor-arg type="java.lang.String" value="yyyy-MM-dd" />    
+                            </bean>    
+                        </property>   
+                        <!-- 为null字段时不显示 -->  
+                        <property name="serializationInclusion">  
+                            <value type="com.fasterxml.jackson.annotation.JsonInclude.Include">NON_NULL</value>  
+                        </property>   
+                    </bean>    
+                </property>    
+            </bean>    
+        </mvc:message-converters>    
+	</mvc:annotation-driven> 
+	 
+	 
+	 
+	 
+	 <!-- 直接访问静态资源时（不需controller处理方法映射），由默认类直接映射资源位置 -->
+	 <mvc:default-servlet-handler/>
+	 
+	 <!-- 静态资源处理， css， js， imgs,否则无法加载这些资源文件  -->
+	<!-- <mvc:resources mapping="/resources/**" location="/resources/" /> -->
+	 
+	<!-- 自动扫描该包，使SpringMVC认为包下用了@controller注解的类是控制器 -->
+	<context:component-scan base-package="controller">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Service" />
+	</context:component-scan> 
+	
+
+	
+ 	
+	 
+	 <!-- 注册自定义的类型转换器,全局共享 -->
+	 <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+            <property name="converters">
+                <list>
+                   <bean class="convert.StringToDateConvert"/>
+                </list>
+           </property>
+      </bean>
+	 
+	 <!-- 验证器注册 -->
+	 <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="providerClass"  value="org.hibernate.validator.HibernateValidator"/>
+        <!-- 如果不加默认到 使用classpath下的 ValidationMessages.properties -->
+        <property name="validationMessageSource" ref="messageSource"/> 
+    </bean>
+	 
+	 <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="basename" value="classpath:messages"/> 
+        <property name="fileEncodings" value="utf-8"/>
+        <property name="cacheSeconds" value="120"/>
+    </bean>
+	 
+	 
+		 
+	 
+	 <!--文件上传  -->
+	 <!--  这里申明的id必须为multipartResolver  -->  
+	<bean id="multipartResolver"  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+	  	<property name="defaultEncoding" value="utf-8"/>  <!-- 解决文件上传时表单编码 -->
+	    <!-- 文件大小最大值 -->
+        <property name="maxUploadSize" value="10485760000" />  
+        <!-- 内存中的最大值 -->
+        <property name="maxInMemorySize" value="40960" /> 
+	</bean>
+		 
+	 <!--配置全局异常类,只要实现HandlerExceptionResolver接口就是全局异常处理器-->
+    <bean id="exceptionResolver" class="exception.resolver.MyExceptionResolver"/>
+	 
+	 
+	 <!-- 拦截器 -->
+	  <mvc:interceptors>
+	 	 <mvc:interceptor>
+	 		<!-- <mvc:mapping path="/**"/>  -->  <!-- 登录拦截器 -->
+	 		<mvc:mapping path="/manager/**" />
+	 		<mvc:mapping path="/student/**" />
+	 		<mvc:mapping path="/teacher/**" />
+	 		<mvc:mapping path="/coures/**" />
+	 		<mvc:mapping path="/grade/**" />
+	 		<bean class="interceptor.LoginInterceptor"/>
+		 </mvc:interceptor>
+	 </mvc:interceptors> 
+	 
+	 
+	 
+    <!-- ViewResolver -->  
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">  
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>  
+        <property name="prefix" value="/WEB-INF/jsps/"/>  
+        <property name="suffix" value=".jsp"/>  
+    </bean>  
+	
+	
+	
+	
+	
+		
+		
+		
+	
+	
+	
+	
+</beans>

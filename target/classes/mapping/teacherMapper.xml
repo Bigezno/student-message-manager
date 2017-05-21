@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dao.TeacherDao">  
+
+	<cache 	eviction="FIFO"    flushInterval="6000"  size="512"	/> 
+	
+	<sql id="teacherAllMessage">teacher_id,teacher_name,password,email</sql>
+	
+	
+	<!-- 根据id值查询一个老师所有信息 -->
+	<select id="getTeacher" parameterType="int"  resultType="Teacher">
+         select <include refid="teacherAllMessage"/> from teacher where teacher_id=#{teacher_id}
+     </select>
+     
+     
+     <!-- 添加一个老师 -->
+     <insert id="saveTeacher" parameterType="Teacher" >
+     	insert into teacher(teacher_name,password,email) 
+     	values(#{teacher_name},#{password},#{email}) 
+     </insert>
+     
+     <!-- 删除一个老师 -->
+     <delete id="deleteTeacher" parameterType="Teacher" >
+     	delete from teacher
+     	<where>
+     		<if test="teacher_name != null and !&quot;&quot;.euqals(teacher_name.trim())">
+     			and teacher_name = #{teacher_name}
+     		</if>
+     		<if test="teacher_id != 0">
+     			or teacher_id = #{id}
+     		</if>
+     	</where>
+     	
+     </delete>
+     
+     <!-- 修改一个老师 -->
+     <update id="updateTeacher" parameterType="Teacher" >
+		update teacher set 
+		teacher_name=#{teacher_name},password=#{password},email=#{email}  
+		where teacher_id =#{teacher_id}  
+     </update>
+     
+     <!-- 列出所有教师信息 -->
+     <select id="getAllTeachers"  resultType="Teacher">
+     	select <include refid="teacherAllMessage"/> from teacher
+     </select>
+     
+     
+     <!-- 查看某个教师的课程信息(course表) :返回一个列表List<Course> -->
+	<select id="getTeacherCourses" parameterType="int" resultMap="teacherResultMap">
+     	select course_id,course_name,time,address from course where teacher_id =#{teacher_id}
+     </select>
+	<resultMap type="Course" id="teacherResultMap">
+		<id property="course_id" column="course_id" />
+		<result property="course_name" column="course_name" />
+		<result property="time" column="time" />
+		<result property="address" column="address" />
+	</resultMap>
+	
+     
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dao.GradeDao">  
+
+	<cache 	eviction="FIFO"    flushInterval="6000"  size="512"	/> 
+	
+	
+	<sql id="gradeMessage">grade_id,teacher_id,student_id,course_id,grade</sql>
+	
+	<!-- 根据学生的id来查找它这门课程的成绩 -->
+	<select id="getGrade" parameterType="int" resultMap="gradeResultMap" >
+		select <include refid="gradeMessage"/> from grade where student_id =#{student_id}
+	</select>
+	<resultMap type="Grade" id="gradeResultMap">
+		<id property="grade_id" column="grade_id" />
+		<result property="grade" column="grade" />
+		<association property="teacher" column="teacher_id" select="getTeacher"/>
+		<association property="student" column="student_id" select="getStudent"/>
+		<association property="course" column="course_id" select="getCourse"/>
+	</resultMap>
+	
+	<select id="getTeacher" parameterType="int" resultType="Teacher">
+		select teacher_name from teacher where teacher_id =#{teacher_id}  
+	</select>
+	
+	<select id="getStudent" parameterType="int" resultType="Student">
+		select student_id,student_name from student where student_id =#{student_id}  
+	</select>
+	
+	<select id="getCourse" parameterType="int" resultType="Course">
+		select course_id,course_name,time,address from course where course_id =#{course_id}  
+	</select>
+	
+	
+
+
+     
+     <!-- 老师根据学生id和课程id来添加,修改成绩  -->
+     <update id="addGrade" parameterType="Grade" >
+		update grade set grade=#{grade} where student_id = #{student_id} and course_id = #{course_id}
+     </update> 
+     
+     
+     <!-- 根据course_id列出该课程的所有学生信息 -->
+      <select id="getAllStudentInCourse" parameterType="int"  resultMap="gradeResultMap">
+     	select <include refid="gradeMessage"/> from grade where course_id = #{course_id}
+     </select> 
+	
+	
+	<!-- 学生选课 -->
+	<insert id="selectCourse"  parameterType="Grade">
+		insert into grade(course_id,teacher_id,student_id) 
+     	values(#{course_id},#{teacher_id},#{student_id}) 
+	</insert>
+	
+	
+</mapper>

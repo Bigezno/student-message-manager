@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<!--开启二级缓存总开关  -->
+	<settings>
+		<!-- lazyLoadingEnabled:延迟加载启用，默认是false  -->
+		<setting name="lazyLoadingEnabled" value="true"/>
+		
+		<!-- aggressiveLazyLoading:积极的懒加载，false的话是按需加载，默认是true -->
+		<setting name="aggressiveLazyLoading" value="false" />
+		
+		<!-- 开启二级缓存默认是false 如果它配成false，其余各个Mapper XML文件配成支持cache也没用 -->
+		<setting name="cacheEnabled" value="true"/>
+	</settings>
+	
+	<typeAliases>
+		<typeAlias alias="Student" type="pojo.Student"/>
+		<typeAlias alias="Teacher" type="pojo.Teacher"/>
+		<typeAlias alias="Course" type="pojo.Course"/>
+		<typeAlias alias="ClassModel" type="pojo.ClassModel"/>
+		<typeAlias alias="Grade" type="pojo.Grade"/>
+		
+		
+		
+		
+	</typeAliases>
+ 	
+ 	<mappers>
+	  	<mapper resource="mapping/studentMapper.xml"/>
+	  	<mapper resource="mapping/teacherMapper.xml"/>
+	  	<mapper resource="mapping/classModelMapper.xml"/>
+	  	<mapper resource="mapping/courseMapper.xml"/>
+	  	<mapper resource="mapping/gradeMapper.xml"/>
+	  	
+	  	
+	  	
+	</mappers>
+	
+	
+	
+</configuration>
+
+
+
+
+
+
+
+
+
+
+

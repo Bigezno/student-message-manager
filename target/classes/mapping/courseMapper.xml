@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dao.CourseDao">  
+
+	<cache 	eviction="FIFO"    flushInterval="6000"  size="512"	/> 
+	
+	
+	<sql id="courseMessage">course_id,course_name,teacher_id,time,address</sql>
+	
+	<!-- 根据课程编号查找某个课程的信息:嵌套查询 -->
+	<select id="getCourse" parameterType="int" resultMap="courseResultMap" >
+		select <include refid="courseMessage"/> from course where course_id =#{course_id}
+	</select>
+	<resultMap type="Course" id="courseResultMap">
+		<id property="course_id" column="course_id" />
+		<result property="course_name" column="course_name" />
+		<result property="time" column="time" />
+		<result property="address" column="address" />
+		<association property="teacher" column="teacher_id" select="getTeacher"/>
+	</resultMap>
+	<select id="getTeacher" parameterType="int" resultType="Teacher">
+		select teacher_id,teacher_name,email from teacher where teacher_id =#{teacher_id}  
+	</select>
+	
+	
+	<!-- 添加一个课程 -->
+	<insert id="saveCourse" parameterType="Course">
+		insert into course(course_name,teacher_id,time,address) 
+     	values(#{course_name},#{teacher_id},#{time},#{address}) 
+	</insert>
+
+	<!-- 删除一个课程 -->
+     <delete id="deleteCourse" parameterType="Course" >
+     	delete from course
+     	<where>
+     		<if test="course_name != null and !&quot;&quot;.euqals(course_name.trim())">
+     			and course_name = #{course_name}
+     		</if>
+     		<if test="course_id != 0">
+     			or course_id = #{course_id}
+     		</if>
+     	</where>
+     	
+     </delete>
+     
+     <!-- 修改一个课程 -->
+     <update id="updateCourse" parameterType="Course" >
+		update course set 
+		course_name=#{course_name},address=#{address},time=#{time},teacher_id = #{teacher_id}  
+		where course_id =#{course_id}  
+     </update>
+     
+     <!-- 列出所有课程 -->
+     <select id="getAllCourses"  resultMap="courseResultMap">
+     	select <include refid="courseMessage"/> from course
+     </select>
+	
+	
+	
+	
+</mapper>

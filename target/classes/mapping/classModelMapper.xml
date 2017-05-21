@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dao.ClassModelDao">  
+
+	<cache 	eviction="FIFO"    flushInterval="6000"  size="512"	/> 
+	
+	
+	<sql id="classMessage">class_id,class_name</sql>
+	
+	
+	
+	<!-- 根据班级id，查询该班级名和课程 -->
+	<select id="getClassModel" parameterType="int" resultMap="classModelResultMap" >
+		select <include refid="classMessage"/> from class where class_id =#{class_id}
+	</select>
+	
+	<resultMap type="ClassModel" id="classModelResultMap">
+		<id property="class_id" column="class_id" />
+		<result property="class_name" column="class_name" />
+		<!-- resultMap引用其他映射文件的结果集：namesapce+id;如：Dao.StudentDao.getStudents -->
+		<collection  select="getStudent"  property="studentList" ofType="Student" column="class_id" />	
+	</resultMap>
+	
+	<select id="getStudent"  parameterType="int" resultType="Student">
+		select student_id,student_name,phone,address,sex from student where class_id = #{class_id}
+	</select> 
+	
+	
+	
+	<!-- 查询所有班级 -->
+     <select id="getAllClassModel"  resultType="ClassModel">
+     	select <include refid="classMessage"/> from class
+     </select>
+	
+	
+	
+	<!-- 添加一个班级 -->
+     <insert id="saveClassModel" parameterType="ClassModel" >
+     	insert into class(class_name) values(#{class_name})
+     </insert>
+     
+     
+     
+     
+     
+     
+     <!-- 删除一个班级 -->
+     <delete id="deleteClassModel" parameterType="ClassModel" >
+     	delete from class
+     	<where>
+     		<if test="class_name != null and !&quot;&quot;.euqals(class_name.trim())">
+     			and class_name = #{class_name}
+     		</if>
+     		<if test="class_id != 0">
+     			or class_id = #{class_id}
+     		</if>
+     	</where>
+     	
+     </delete>
+     
+     <!-- 修改一个班级 -->
+     <update id="updateClassModel" parameterType="ClassModel" >
+		update class set class_name=#{class_name} where class_id = #{class_id}
+     </update>
+     
+     
+	
+	
+	
+
+		
+	
+	
+	
+</mapper>
